@@ -43,7 +43,7 @@ export default function App() {
     else
       setLives(lives - 1);
 
-    if(lives < 0) {
+    if(lives == 0) {
       setLives(5);
       setScore(0);
     }
