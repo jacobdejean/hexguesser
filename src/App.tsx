@@ -54,8 +54,7 @@ export default function App() {
   return (
     <div className={'wrapper'}>
       <div className={'title'}>hexguesser</div>
-      <div className={'title'}>Score: {score}</div>
-      <div className={'title'}>Lives: {lives}</div>
+      <div className={'title'}>Score: {score} Lives: {lives}</div>
       <button className={'color-container'} onClick={_ => setAnswer(hexgen(24))}>
         <div className={'color-box'} ref={e => colorBox = e}></div>
       </button>

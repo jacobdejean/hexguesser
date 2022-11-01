@@ -54,3 +54,7 @@
   max-height: 3rem;
   height: 3rem;
 }
+
+p {
+  margin: 0;
+}
