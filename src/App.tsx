@@ -1,84 +1,125 @@
-import React, { useEffect, useState } from 'react'
-import reactLogo from './assets/react.svg'
-import './App.css'
-import UpArrow from '../public/icons/arrow-up-short.svg'
-import DownArrow from '../public/icons/arrow-down-short.svg'
-import LeftArrow from '../public/icons/arrow-left-short.svg'
-import RightArrow from '../public/icons/arrow-right-short.svg'
+import { ReactNode, useEffect, useState } from "react";
+import "./App.css";
 
 export default function App() {
   const [answer, setAnswer] = useState(hexgen(24));
+  const [guess, setGuess] = useState("");
   const [score, setScore] = useState(0);
   const [lives, setLives] = useState(5);
   const guesses = getShuffledGuesses(answer);
 
-  let colorBox: HTMLDivElement | null = null
+  let colorBox: HTMLDivElement | null = null;
 
   useEffect(() => {
-    console.log(answer)
-    colorBox && (colorBox.style.backgroundColor = `#${answer}`)
-    window.onkeydown = e => keyPress(e);
-  })
+    window.addEventListener("keydown", keyPress);
+    return () => window.removeEventListener("keydown", keyPress);
+  }, []);
 
   function keyPress(evt: KeyboardEvent) {
-    switch(evt.key) {
-      case 'w':
-        makeGuess(guesses[0]);
+    switch (evt.key) {
+      case "w":
+        setGuess(guesses[0]);
         break;
-      case 'a':
-        makeGuess(guesses[1]);
+      case "a":
+        setGuess(guesses[1]);
         break;
-      case 'd':
-        makeGuess(guesses[2]);
+      case "d":
+        setGuess(guesses[2]);
         break;
-      case 's':
-        makeGuess(guesses[3]);
+      case "s":
+        setGuess(guesses[3]);
         break;
     }
   }
 
-  function makeGuess(guess: string) {
-    if(guess === answer)
-      setScore(score + 1);
-    else
-      setLives(lives - 1);
+  useEffect(() => {
+    if (colorBox) colorBox.style.backgroundColor = "#" + answer;
+  }, [answer]);
 
-    if(lives == 0) {
+  useEffect(() => {
+    if (score > 0) console.log("Correct!");
+  }, [score]);
+
+  useEffect(() => {
+    if (guess === answer) setScore(score + 1);
+    else setLives(lives - 1);
+
+    if (lives === 0) {
       setLives(5);
       setScore(0);
+
+      console.log("Game over!");
     }
-    
+
     setAnswer(hexgen(24));
-  }
+  }, [guess]);
 
   return (
-    <div className={'wrapper'}>
-      <div className={'title'}>hexguesser</div>
-      <div className={'title'}>Score: {score} Lives: {lives}</div>
-      <button className={'color-container'} onClick={_ => setAnswer(hexgen(24))}>
-        <div className={'color-box'} ref={e => colorBox = e}></div>
+    <div className="app">
+      <div className="title">
+        <h2>hexguesser</h2>
+        <h2>
+          Score: {score} Lives: {lives}
+        </h2>
+      </div>
+
+      <button
+        className="color-container"
+        onClick={(_) => setAnswer(hexgen(24))}
+      >
+        <div className="color-box" ref={(e) => (colorBox = e)}></div>
       </button>
-      <div className={'guess-container'}>
-        <p className={'guess-text'}>{'#' + guesses[0]}</p>
-        <div className={'guess-row'}>
-          <p className={'guess-button'}>W</p>
-        </div>
-        <div className={'guess-row'}>
-          <p className={'guess-text'}>{`#${guesses[1]}`}</p>
-          <p className={'guess-button'}>A</p>
-          <p className={'guess-button'}>S</p>
-          <p className={'guess-button'}>D</p>
-          <p className={'guess-text'}>{`#${guesses[2]}`}</p>
-        </div>
-        <p className={'guess-text'}>{`#${guesses[3]}`}</p>
+      <div className="guess-container">
+        <GuessButtons
+          keys={["w", "a", "s", "d"]}
+          guesses={guesses}
+          onClick={setGuess}
+        />
+        <GuessLabels labels={guesses} />
       </div>
     </div>
-     
+  );
+}
+
+function GuessButtons({
+  keys,
+  guesses,
+  onClick,
+}: {
+  keys: string[];
+  guesses: string[];
+  onClick: (guess: string) => void;
+}) {
+  return (
+    <>
+      {keys.map((key, index) => (
+        <button
+          key={`gb-${key}`}
+          id={`gb-${key}`}
+          className="guess"
+          onClick={() => onClick(guesses[index])}
+        >
+          {key.toUpperCase()}
+        </button>
+      ))}
+    </>
+  );
+}
+
+function GuessLabels({ labels }: { labels: string[] }) {
+  return (
+    <>
+      {labels.map((label, index) => (
+        <p key={`gt-${index}`} id={`gt-${index}`} className="guess-text">
+          #{label.toUpperCase()}
+        </p>
+      ))}
+    </>
   );
 }
 
 function getShuffledGuesses(answer: string) {
-  const guesses = [hexgen(24), hexgen(24), hexgen(24), hexgen(24)];
+  const guesses = Array.from({ length: 4 }).map((_) => hexgen(24));
 
   guesses[Math.floor(Math.random() * 4)] = answer;
 
@@ -86,15 +127,13 @@ function getShuffledGuesses(answer: string) {
 }
 
 function hexgen(size: number) {
-  size < 1 && (size = 1);
+  const length = Math.floor(size / 4);
 
-  const [n, r] = [Math.floor(size / 4), size % 4];
-  let hex = '';
-
-  r && (hex = Math.floor(Math.random() * (1 << r)).toString(16));
-  for(let i = 0; i < n; i++) {
-    hex += Math.floor(Math.random() * 15).toString(16);
-  }
+  const hex = Array.from({ length }, () => 0)
+    .map((_) => {
+      return Math.floor(Math.random() * 15).toString(16);
+    })
+    .join("");
 
   return hex;
 }

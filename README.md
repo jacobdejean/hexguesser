@@ -1,5 +1,8 @@
 # hexguesser
+
 A 24 bit hexadecimal color guessing game. It is build using vite, typescript, vanilla css, and react
+
+![Game screenshot](screenshot.png)
 
 ## Building
 
